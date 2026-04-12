@@ -22,7 +22,7 @@
     max-width: 560px; width: 100%; padding: 40px 36px;
     border-top: 6px solid var(--honey);
   }
-  .header { display: flex; align-items: center; gap: 18px; margin-bottom: 32px; }
+  .header { display: flex; align-items: center; gap: 18px; margin-bottom: 20px; }
   .logo {
     width: 72px; height: 72px; border-radius: 18px; flex-shrink: 0;
     box-shadow: 0 3px 12px rgba(0,0,0,0.15); object-fit: cover;
@@ -32,6 +32,16 @@
   .version-badge {
     display: inline-block; background: var(--honey); color: var(--brown);
     border-radius: 99px; padding: 3px 12px; font-size: 0.8rem; font-weight: 800; margin-left: 8px;
+  }
+  .compat-warn {
+    margin-bottom: 20px; background: #FFF3CD; border: 2px solid #F0A000;
+    border-radius: 12px; padding: 14px 16px; font-size: 0.88rem;
+    color: #7D5A00; line-height: 1.5; display: none;
+    animation: pulse-warn 1.5s ease-in-out infinite;
+  }
+  @keyframes pulse-warn {
+    0%, 100% { border-color: #F0A000; }
+    50% { border-color: #E74C3C; }
   }
   .steps { display: flex; flex-direction: column; gap: 14px; margin-bottom: 28px; }
   .step {
@@ -77,33 +87,17 @@
   .status.success { background: #EAFAF1; color: #1D6A3F; border: 1.5px solid #82E0AA; display: flex; }
   .status.error   { background: #FDEDEC; color: #922B21; border: 1.5px solid #F1948A; }
   .status-icon { font-size: 1.4rem; flex-shrink: 0; }
-
   .photo-wrap {
-    margin: -6px 0 14px 0;
-    border-radius: 14px;
-    overflow: hidden;
-    border: 1.5px solid #f0e0c0;
-    background: var(--cream);
+    margin: -6px 0 14px 0; border-radius: 14px; overflow: hidden;
+    border: 1.5px solid #f0e0c0; background: var(--cream);
   }
   .photo-boitier {
-    width: 100%;
-    display: block;
-    border-radius: 14px 14px 0 0;
-    max-height: 280px;
-    object-fit: cover;
+    width: 100%; display: block; border-radius: 14px 14px 0 0;
+    max-height: 280px; object-fit: cover;
   }
   .photo-caption {
-    padding: 8px 14px;
-    font-size: 0.8rem;
-    color: var(--brown-light);
-    font-weight: 600;
-    text-align: center;
-    background: var(--cream);
-  }
-  .compat-warn {
-    margin-top: 24px; background: #FFF3CD; border: 1.5px solid #F0C040;
-    border-radius: 12px; padding: 12px 16px; font-size: 0.83rem;
-    color: #7D5A00; line-height: 1.5; display: none;
+    padding: 8px 14px; font-size: 0.8rem; color: var(--brown-light);
+    font-weight: 600; text-align: center; background: var(--cream);
   }
   .footer { margin-top: 16px; text-align: center; font-size: 0.78rem; color: #bbb; }
   @media (max-width: 480px) {
@@ -123,6 +117,10 @@
     </div>
   </div>
 
+  <div class="compat-warn" id="compatWarn">
+    ⚠️ <strong>Navigateur non compatible.</strong> Cette page nécessite <strong>Google Chrome</strong> ou <strong>Microsoft Edge</strong> (version récente). Firefox et Safari ne supportent pas l'API Serial.
+  </div>
+
   <div class="steps">
     <div class="step">
       <div class="step-num">1</div>
@@ -135,7 +133,7 @@
 
   <div class="photo-wrap">
     <img class="photo-boitier"
-         src="https://firebasestorage.googleapis.com/v0/b/rucheo.firebasestorage.app/o/MAJ_GW%2Fflash_web%2F20260412_201139.png?alt=media&token=80a479d2-4081-41e6-9df8-8162d4338f51"
+         src="https://firebasestorage.googleapis.com/v0/b/rucheo.firebasestorage.app/o/MAJ_GW%2Fflash_web%2F20260412_201139.png?alt=media&token=80a479d2-4081-41e6-9df8-8162d4328f51"
          alt="Extraction du module ESP32"
          onerror="this.style.display='none'">
     <p class="photo-caption">&#128247; Tirez sur le module ESP32 pour le sortir du boîtier</p>
@@ -180,10 +178,6 @@
   <div class="status" id="statusBox">
     <div class="status-icon" id="statusIcon">ℹ️</div>
     <div id="statusText"></div>
-  </div>
-
-  <div class="compat-warn" id="compatWarn">
-    ⚠️ <strong>Navigateur non compatible.</strong> Cette page nécessite <strong>Google Chrome</strong> ou <strong>Microsoft Edge</strong> (version récente). Firefox et Safari ne supportent pas l'API Serial.
   </div>
 </div>
 
@@ -343,7 +337,6 @@ async function flashESP32(port, firmware, onProgress) {
   }
 
   try {
-    // Sync
     for (let i = 0; i < 7; i++) {
       try {
         const syncData = new Uint8Array(36);
@@ -394,3 +387,4 @@ async function flashESP32(port, firmware, onProgress) {
 </script>
 </body>
 </html>
+
