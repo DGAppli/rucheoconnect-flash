@@ -94,6 +94,11 @@
     box-shadow: 0 6px 24px rgba(245,166,35,0.55);
   }
 
+  .alert-danger {
+    margin-top: 16px; background: #FDEDEC; border: 2px solid #E74C3C;
+    border-radius: 12px; padding: 14px 16px; font-size: 0.88rem;
+    color: #922B21; line-height: 1.5; font-weight: 700; text-align: center;
+  }
   .footer { margin-top: 16px; text-align: center; font-size: 0.78rem; color: #bbb; }
   @media (max-width: 480px) {
     .card { padding: 28px 18px; } .logo { width: 56px; height: 56px; }
@@ -160,6 +165,10 @@
   <esp-web-install-button manifest="manifest.json">
     <button slot="activate">⚡ Flasher la passerelle</button>
   </esp-web-install-button>
+
+  <div class="alert-danger">
+    🚨 <strong>NE COCHEZ PAS la case "Erase device"</strong> — cela effacerait la calibration de la balance et tous les réglages de la passerelle.
+  </div>
 
 </div>
 
