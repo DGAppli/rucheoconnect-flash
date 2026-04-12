@@ -109,7 +109,9 @@
 <body>
 <div class="card">
   <div class="header">
-    <img class="logo" src="https://firebasestorage.googleapis.com/v0/b/rucheo.firebasestorage.app/o/MAJ_GW%2Fflash_web%2Ficon_new.png?alt=media&token=450535dc-db24-4c82-b48b-6fafbf80445f" alt="RuchéoConnect"
+    <img class="logo"
+         src="https://firebasestorage.googleapis.com/v0/b/rucheo.firebasestorage.app/o/MAJ_GW%2Fflash_web%2Ficon_new.png?alt=media&token=450535dc-db24-4c82-b48b-6fafbf80445f"
+         alt="RuchéoConnect"
          onerror="this.src='https://via.placeholder.com/72x72/F5A623/5C3A1E?text=RC'">
     <div class="header-text">
       <h1>RuchéoConnect</h1>
@@ -126,7 +128,7 @@
       <div class="step-num">1</div>
       <div class="step-body">
         <strong>Sortez le module ESP32 du boîtier</strong>
-        <span>Tirez doucement sur le module ESP32 pour l&#39;extraire du boîtier (voir photo ci-dessous).</span>
+        <span>Tirez doucement sur le module ESP32 pour l'extraire du boîtier (voir photo ci-dessous).</span>
       </div>
     </div>
   </div>
@@ -136,29 +138,29 @@
          src="https://firebasestorage.googleapis.com/v0/b/rucheo.firebasestorage.app/o/MAJ_GW%2Fflash_web%2F20260412_201139.png?alt=media&token=80a479d2-4081-41e6-9df8-8162d4338f51"
          alt="Extraction du module ESP32"
          onerror="this.style.display='none'">
-    <p class="photo-caption">&#128247; Tirez sur le module ESP32 pour le sortir du boîtier</p>
+    <p class="photo-caption">📷 Tirez sur le module ESP32 pour le sortir du boîtier</p>
   </div>
 
   <div class="steps">
     <div class="step">
       <div class="step-num">2</div>
       <div class="step-body">
-        <strong>Branchez le câble USB sur l&#39;ESP32</strong>
-        <span>Connectez le câble USB directement sur le port USB-C du module ESP32 sorti du boîtier.</span>
+        <strong>Branchez le câble USB sur l'ESP32</strong>
+        <span>Connectez le câble USB-C directement sur le module ESP32 sorti du boîtier.</span>
       </div>
     </div>
     <div class="step">
       <div class="step-num">3</div>
       <div class="step-body">
-        <strong>Cliquez sur « Flasher la passerelle »</strong>
-        <span>Une fenêtre apparaît pour sélectionner le port série. Choisissez le port correspondant à votre passerelle (généralement le seul disponible).</span>
+        <strong>Passez l'ESP32 en mode flash</strong>
+        <span>Maintenez le bouton <strong>BOOT</strong> enfoncé, appuyez brièvement sur <strong>RESET</strong>, puis relâchez BOOT. La LED s'éteint : l'ESP32 est prêt.</span>
       </div>
     </div>
     <div class="step">
       <div class="step-num">4</div>
       <div class="step-body">
-        <strong>Attendez la fin de la mise à jour</strong>
-        <span>La barre de progression indique l&#39;avancement. Ne débranchez pas le câble pendant l&#39;opération (~2 min). Remettez ensuite l&#39;ESP32 dans le boîtier.</span>
+        <strong>Cliquez sur « Flasher la passerelle »</strong>
+        <span>Sélectionnez le port série dans la fenêtre, puis attendez la fin (~2 min). Remettez ensuite l'ESP32 dans le boîtier.</span>
       </div>
     </div>
   </div>
@@ -225,43 +227,40 @@ async function startFlash() {
     const total = parseInt(resp.headers.get('Content-Length') || '0');
     let received = 0;
     const chunks = [];
-
     while (true) {
       const { done, value } = await reader.read();
       if (done) break;
       chunks.push(value);
       received += value.length;
-      if (total > 0) setProgress(Math.round(received / total * 30), 'Téléchargement du firmware…');
+      if (total > 0) setProgress(Math.round(received / total * 20), 'Téléchargement du firmware…');
     }
-
-    const firmware = new Uint8Array(chunks.reduce((acc, chunk) => {
-      const tmp = new Uint8Array(acc.length + chunk.length);
-      tmp.set(acc); tmp.set(chunk, acc.length);
-      return tmp;
+    const firmware = new Uint8Array(chunks.reduce((acc, c) => {
+      const t = new Uint8Array(acc.length + c.length);
+      t.set(acc); t.set(c, acc.length); return t;
     }, new Uint8Array()));
 
-    setProgress(30, 'Connexion à la passerelle…');
-    setStatus('info', '🔌', 'Sélectionnez le port série de votre passerelle dans la fenêtre qui s\'ouvre…');
+    setProgress(20, 'Connexion à la passerelle…');
+    setStatus('info', '🔌', 'Sélectionnez le port série dans la fenêtre qui s\'ouvre…');
 
     const port = await navigator.serial.requestPort();
+    // ESP32-S3 : 115200 baud, puis sync à 921600
     await port.open({ baudRate: 115200 });
 
-    setStatus('info', '⚡', 'Flash en cours, ne débranchez pas la passerelle…');
-    setProgress(35, 'Envoi du firmware…');
+    setStatus('info', '⚡', 'Flash en cours, ne débranchez pas…');
+    setProgress(25, 'Synchronisation…');
 
-    await flashESP32(port, firmware, (pct) => {
-      setProgress(35 + Math.round(pct * 60), 'Envoi du firmware…');
+    await flashESP32S3(port, firmware, (pct) => {
+      setProgress(25 + Math.round(pct * 72), 'Envoi du firmware…');
     });
 
     await port.close();
-
     setProgress(100, 'Mise à jour terminée !');
-    setStatus('success', '✅', '<strong>Mise à jour réussie !</strong><br>La passerelle redémarre. Vous pouvez débrancher le câble USB.');
+    setStatus('success', '✅', '<strong>Mise à jour réussie !</strong><br>La passerelle redémarre. Débranchez le câble USB et remettez l\'ESP32 dans le boîtier.');
 
   } catch (err) {
     console.error(err);
-    if (err.name === 'NotFoundError' || err.message.includes('No port selected')) {
-      setStatus('error', '❌', 'Aucun port sélectionné. Recommencez et sélectionnez le port de la passerelle.');
+    if (err.name === 'NotFoundError' || (err.message && err.message.includes('No port'))) {
+      setStatus('error', '❌', 'Aucun port sélectionné. Recommencez.');
     } else {
       setStatus('error', '❌', '<strong>Erreur :</strong> ' + err.message);
     }
@@ -271,18 +270,32 @@ async function startFlash() {
   }
 }
 
-async function flashESP32(port, firmware, onProgress) {
+// ── Implémentation ESP32 ROM bootloader (SLIP) ──────────────────────────────
+async function flashESP32S3(port, firmware, onProgress) {
   const SLIP_END = 0xC0, SLIP_ESC = 0xDB, SLIP_ESC_END = 0xDC, SLIP_ESC_ESC = 0xDD;
+  const sleep = ms => new Promise(r => setTimeout(r, ms));
+
   const writer = port.writable.getWriter();
   const reader = port.readable.getReader();
-  const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+  // Reset DTR/RTS pour entrer en mode bootloader
+  async function resetToBootloader() {
+    try {
+      await port.setSignals({ dataTerminalReady: false, requestToSend: true });
+      await sleep(100);
+      await port.setSignals({ dataTerminalReady: true, requestToSend: false });
+      await sleep(50);
+      await port.setSignals({ dataTerminalReady: false, requestToSend: false });
+      await sleep(500);
+    } catch(e) { /* DTR/RTS non supporté sur certains adaptateurs */ }
+  }
 
   function slipEncode(data) {
     const out = [SLIP_END];
     for (const b of data) {
       if (b === SLIP_END) { out.push(SLIP_ESC, SLIP_ESC_END); }
       else if (b === SLIP_ESC) { out.push(SLIP_ESC, SLIP_ESC_ESC); }
-      else { out.push(b); }
+      else out.push(b);
     }
     out.push(SLIP_END);
     return new Uint8Array(out);
@@ -292,70 +305,98 @@ async function flashESP32(port, firmware, onProgress) {
     const pkt = new Uint8Array(8 + data.length);
     const v = new DataView(pkt.buffer);
     v.setUint8(0, 0x00); v.setUint8(1, op);
-    v.setUint16(2, data.length, true); v.setUint32(4, chk, true);
+    v.setUint16(2, data.length, true);
+    v.setUint32(4, chk, true);
     pkt.set(data, 8);
     return pkt;
   }
 
-  async function readResp(timeoutMs = 3000) {
-    const deadline = Date.now() + timeoutMs;
-    let buf = [], inPacket = false;
-    while (Date.now() < deadline) {
-      let result;
-      try {
-        result = await Promise.race([
-          reader.read(),
-          new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), 200))
-        ]);
-      } catch { continue; }
-      if (result.done) break;
-      for (const b of result.value) {
-        if (b === SLIP_END) {
-          if (inPacket && buf.length > 0) {
-            const decoded = [];
-            for (let i = 0; i < buf.length; i++) {
-              if (buf[i] === SLIP_ESC) { i++; decoded.push(buf[i] === SLIP_ESC_END ? SLIP_END : SLIP_ESC); }
-              else decoded.push(buf[i]);
-            }
-            return new Uint8Array(decoded);
-          }
-          inPacket = true; buf = [];
-        } else if (inPacket) buf.push(b);
-      }
-    }
-    throw new Error('Pas de réponse de la passerelle. Vérifiez la connexion USB.');
+  function checksum(data) {
+    let c = 0xEF;
+    for (const b of data) c ^= b;
+    return c;
   }
 
-  async function sendCmd(op, data, chk = 0, retries = 3) {
+  async function readPacket(timeoutMs = 3000) {
+    const deadline = Date.now() + timeoutMs;
+    let buf = [], inPkt = false;
+    while (Date.now() < deadline) {
+      let res;
+      try {
+        res = await Promise.race([
+          reader.read(),
+          new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), 100))
+        ]);
+      } catch { continue; }
+      if (res.done) break;
+      for (const b of res.value) {
+        if (b === SLIP_END) {
+          if (inPkt && buf.length > 0) {
+            const dec = [];
+            for (let i = 0; i < buf.length; i++) {
+              if (buf[i] === SLIP_ESC) { i++; dec.push(buf[i] === SLIP_ESC_END ? SLIP_END : SLIP_ESC); }
+              else dec.push(buf[i]);
+            }
+            return new Uint8Array(dec);
+          }
+          inPkt = true; buf = [];
+        } else if (inPkt) buf.push(b);
+      }
+    }
+    throw new Error('Pas de réponse bootloader.');
+  }
+
+  async function sendCmd(op, data, chk = 0, retries = 5, timeoutMs = 3000) {
     for (let i = 0; i < retries; i++) {
       await writer.write(slipEncode(buildCmd(op, data, chk)));
       try {
-        const resp = await readResp(3000);
-        if (resp[1] === op) return resp;
+        const resp = await readPacket(timeoutMs);
+        if (resp.length >= 2 && resp[1] === op) return resp;
       } catch(e) { if (i === retries - 1) throw e; }
     }
   }
 
   try {
-    for (let i = 0; i < 7; i++) {
-      try {
-        const syncData = new Uint8Array(36);
-        syncData[0] = 0x07; syncData[1] = 0x07; syncData[2] = 0x12; syncData[3] = 0x20;
-        syncData.fill(0x55, 4);
-        await sendCmd(0x08, syncData, 0, 1);
-        break;
-      } catch { await sleep(100); if (i === 6) throw new Error('Synchronisation impossible. Maintenez BOOT enfoncé et réessayez.'); }
-    }
+    // ── 1. Reset vers bootloader via DTR/RTS ──
+    await resetToBootloader();
 
-    const FLASH_ADDR = 0x10000, BLOCK_SIZE = 0x200;
+    // ── 2. Sync ──
+    let synced = false;
+    for (let i = 0; i < 10; i++) {
+      const syncData = new Uint8Array(36);
+      syncData[0] = 0x07; syncData[1] = 0x07; syncData[2] = 0x12; syncData[3] = 0x20;
+      syncData.fill(0x55, 4);
+      try {
+        await writer.write(slipEncode(buildCmd(0x08, syncData)));
+        const r = await readPacket(500);
+        if (r && r[1] === 0x08) { synced = true; break; }
+      } catch { await sleep(50); }
+    }
+    if (!synced) throw new Error('Synchronisation impossible. Maintenez BOOT + appuyez RESET, puis réessayez.');
+
+    // Vider les réponses sync supplémentaires
+    await sleep(100);
+    try { while(true) await readPacket(50); } catch {}
+
+    // ── 3. SPI_ATTACH (nécessaire ESP32-S3) ──
+    const spiAttach = new Uint8Array(8); // tous zéros
+    await sendCmd(0x0D, spiAttach);
+
+    // ── 4. FLASH_BEGIN ──
+    const FLASH_ADDR = 0x10000;
+    const BLOCK_SIZE = 0x1000; // 4KB pour ESP32-S3
     const numBlocks = Math.ceil(firmware.length / BLOCK_SIZE);
+    const eraseSize = numBlocks * BLOCK_SIZE;
 
     const beginData = new Uint8Array(16);
     const bv = new DataView(beginData.buffer);
-    bv.setUint32(0, firmware.length, true); bv.setUint32(4, numBlocks, true);
-    bv.setUint32(8, BLOCK_SIZE, true); bv.setUint32(12, FLASH_ADDR, true);
-    await sendCmd(0x02, beginData);
+    bv.setUint32(0, eraseSize, true);
+    bv.setUint32(4, numBlocks, true);
+    bv.setUint32(8, BLOCK_SIZE, true);
+    bv.setUint32(12, FLASH_ADDR, true);
+    await sendCmd(0x02, beginData, 0, 3, 30000); // erase peut prendre du temps
 
+    // ── 5. FLASH_DATA ──
     for (let seq = 0; seq < numBlocks; seq++) {
       const start = seq * BLOCK_SIZE;
       const end = Math.min(start + BLOCK_SIZE, firmware.length);
@@ -363,21 +404,22 @@ async function flashESP32(port, firmware, onProgress) {
       block.set(firmware.slice(start, end));
       if (end - start < BLOCK_SIZE) block.fill(0xFF, end - start);
 
-      let chk = 0xEF;
-      for (const b of block) chk ^= b;
-
+      const chk = checksum(block);
       const blockData = new Uint8Array(16 + BLOCK_SIZE);
       const dv = new DataView(blockData.buffer);
-      dv.setUint32(0, BLOCK_SIZE, true); dv.setUint32(4, seq, true);
-      dv.setUint32(8, 0, true); dv.setUint32(12, 0, true);
+      dv.setUint32(0, BLOCK_SIZE, true);
+      dv.setUint32(4, seq, true);
+      dv.setUint32(8, 0, true);
+      dv.setUint32(12, 0, true);
       blockData.set(block, 16);
+
       await sendCmd(0x03, blockData, chk);
       onProgress((seq + 1) / numBlocks);
     }
 
-    const endData = new Uint8Array(4);
-    new DataView(endData.buffer).setUint32(0, 0, true);
-    try { await sendCmd(0x04, endData, 0, 1); } catch {}
+    // ── 6. FLASH_END ──
+    const endData = new Uint8Array(4); // reboot=0
+    try { await sendCmd(0x04, endData, 0, 1, 1000); } catch {}
 
   } finally {
     try { reader.releaseLock(); } catch {}
@@ -387,4 +429,3 @@ async function flashESP32(port, firmware, onProgress) {
 </script>
 </body>
 </html>
-
