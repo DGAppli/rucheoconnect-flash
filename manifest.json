@@ -6,6 +6,8 @@
     {
       "chipFamily": "ESP32-S3",
       "parts": [
+        { "path": "GW_1_0_60.ino.bootloader.bin", "offset": 0 },
+        { "path": "GW_1_0_60.ino.partitions.bin", "offset": 32768 },
         { "path": "GW_1_0_60.ino.bin", "offset": 65536 }
       ]
     }
