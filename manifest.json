@@ -1,17 +1,12 @@
 {
   "name": "RuchéoConnect Gateway",
   "version": "1.0.60",
-  "home_assistant_domain": "rucheoconnect",
-  "funding_url": "https://rucheoconnect.fr",
   "new_install_skip_erase": false,
   "builds": [
     {
       "chipFamily": "ESP32-S3",
       "parts": [
-        {
-          "path": "GW_1_0_60.ino.bin",
-          "offset": 65536
-        }
+        { "path": "GW_1_0_60.ino.bin", "offset": 65536 }
       ]
     }
   ]

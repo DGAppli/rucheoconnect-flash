@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>RuchéoConnect – Mise à jour passerelle</title>
+<script type="module" src="https://unpkg.com/esp-web-tools@10/dist/web/install-button.js?module"></script>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap');
   :root {
@@ -56,37 +57,6 @@
   }
   .step-body strong { display: block; font-size: 0.95rem; font-weight: 700; color: var(--brown); margin-bottom: 3px; }
   .step-body span { font-size: 0.84rem; color: #7A5230; line-height: 1.45; }
-  .btn-flash {
-    width: 100%; padding: 17px 24px;
-    background: linear-gradient(135deg, var(--honey) 0%, var(--honey-dark) 100%);
-    color: var(--brown); border: none; border-radius: 14px;
-    font-family: 'Nunito', sans-serif; font-size: 1.1rem; font-weight: 800;
-    cursor: pointer; transition: all .18s;
-    box-shadow: 0 4px 16px rgba(245,166,35,0.4); letter-spacing: 0.3px;
-    display: flex; align-items: center; justify-content: center; gap: 10px;
-  }
-  .btn-flash:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 6px 24px rgba(245,166,35,0.55); }
-  .btn-flash:disabled { opacity: 0.55; cursor: not-allowed; transform: none; box-shadow: none; }
-  .progress-wrap { margin-top: 22px; display: none; }
-  .progress-label {
-    font-size: 0.88rem; font-weight: 700; color: var(--brown);
-    margin-bottom: 8px; display: flex; justify-content: space-between;
-  }
-  .progress-bar { background: #edd; border-radius: 99px; height: 10px; overflow: hidden; }
-  .progress-fill {
-    height: 100%; border-radius: 99px;
-    background: linear-gradient(90deg, var(--honey) 0%, var(--honey-dark) 100%);
-    width: 0%; transition: width .3s ease;
-  }
-  .status {
-    margin-top: 20px; padding: 14px 16px; border-radius: 12px;
-    font-size: 0.9rem; font-weight: 700; display: none;
-    align-items: center; gap: 10px; line-height: 1.4;
-  }
-  .status.info    { background: #EBF5FB; color: #1A5276; border: 1.5px solid #85C1E9; }
-  .status.success { background: #EAFAF1; color: #1D6A3F; border: 1.5px solid #82E0AA; display: flex; }
-  .status.error   { background: #FDEDEC; color: #922B21; border: 1.5px solid #F1948A; }
-  .status-icon { font-size: 1.4rem; flex-shrink: 0; }
   .photo-wrap {
     margin: -6px 0 14px 0; border-radius: 14px; overflow: hidden;
     border: 1.5px solid #f0e0c0; background: var(--cream);
@@ -99,6 +69,26 @@
     padding: 8px 14px; font-size: 0.8rem; color: var(--brown-light);
     font-weight: 600; text-align: center; background: var(--cream);
   }
+
+  /* ── Bouton ESP Web Tools stylé comme l'original ── */
+  esp-web-install-button {
+    width: 100%;
+    display: block;
+  }
+  esp-web-install-button [slot=activate] {
+    width: 100%; padding: 17px 24px;
+    background: linear-gradient(135deg, #F5A623 0%, #D4881A 100%);
+    color: #5C3A1E; border: none; border-radius: 14px;
+    font-family: 'Nunito', sans-serif; font-size: 1.1rem; font-weight: 800;
+    cursor: pointer; transition: all .18s;
+    box-shadow: 0 4px 16px rgba(245,166,35,0.4); letter-spacing: 0.3px;
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+  }
+  esp-web-install-button [slot=activate]:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 24px rgba(245,166,35,0.55);
+  }
+
   .footer { margin-top: 16px; text-align: center; font-size: 0.78rem; color: #bbb; }
   @media (max-width: 480px) {
     .card { padding: 28px 18px; } .logo { width: 56px; height: 56px; }
@@ -152,280 +142,26 @@
     <div class="step">
       <div class="step-num">3</div>
       <div class="step-body">
-        <strong>Passez l'ESP32 en mode flash</strong>
-        <span>Maintenez le bouton <strong>BOOT</strong> enfoncé, appuyez brièvement sur <strong>RESET</strong>, puis relâchez BOOT. La LED s'éteint : l'ESP32 est prêt.</span>
-      </div>
-    </div>
-    <div class="step">
-      <div class="step-num">4</div>
-      <div class="step-body">
         <strong>Cliquez sur « Flasher la passerelle »</strong>
-        <span>Sélectionnez le port série dans la fenêtre, puis attendez la fin (~2 min). Remettez ensuite l'ESP32 dans le boîtier.</span>
+        <span>Sélectionnez le port série dans la fenêtre qui s'ouvre, puis attendez la fin (~2 min). Remettez ensuite l'ESP32 dans le boîtier.</span>
       </div>
     </div>
   </div>
 
-  <button class="btn-flash" id="btnFlash" onclick="startFlash()">
-    ⚡ Flasher la passerelle
-  </button>
+  <esp-web-install-button manifest="manifest.json">
+    <button slot="activate">⚡ Flasher la passerelle</button>
+  </esp-web-install-button>
 
-  <div class="progress-wrap" id="progressWrap">
-    <div class="progress-label">
-      <span id="progressText">Téléchargement du firmware…</span>
-      <span id="progressPct">0%</span>
-    </div>
-    <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
-  </div>
-
-  <div class="status" id="statusBox">
-    <div class="status-icon" id="statusIcon">ℹ️</div>
-    <div id="statusText"></div>
-  </div>
 </div>
 
 <div class="footer">RuchéoConnect © 2024 – Support : contact@rucheoconnect.fr</div>
 
 <script>
-const FIRMWARE_URL = "GW_1_0_60.ino.bin";
-
-window.onload = function() {
-  if (!navigator.serial) {
-    document.getElementById('compatWarn').style.display = 'block';
-    document.getElementById('btnFlash').disabled = true;
-  }
-};
-
-function setStatus(type, icon, text) {
-  const box = document.getElementById('statusBox');
-  box.className = 'status ' + type;
-  box.style.display = 'flex';
-  document.getElementById('statusIcon').textContent = icon;
-  document.getElementById('statusText').innerHTML = text;
-}
-
-function setProgress(pct, label) {
-  document.getElementById('progressWrap').style.display = 'block';
-  document.getElementById('progressFill').style.width = pct + '%';
-  document.getElementById('progressPct').textContent = pct + '%';
-  if (label) document.getElementById('progressText').textContent = label;
-}
-
-async function startFlash() {
-  const btn = document.getElementById('btnFlash');
-  btn.disabled = true;
-  document.getElementById('statusBox').style.display = 'none';
-  document.getElementById('progressWrap').style.display = 'none';
-
-  try {
-    setProgress(0, 'Téléchargement du firmware…');
-    setStatus('info', '⬇️', 'Téléchargement du firmware en cours…');
-
-    const resp = await fetch(FIRMWARE_URL);
-    if (!resp.ok) throw new Error('Impossible de télécharger le firmware (HTTP ' + resp.status + ')');
-
-    const reader = resp.body.getReader();
-    const total = parseInt(resp.headers.get('Content-Length') || '0');
-    let received = 0;
-    const chunks = [];
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      chunks.push(value);
-      received += value.length;
-      if (total > 0) setProgress(Math.round(received / total * 20), 'Téléchargement du firmware…');
+  window.onload = function() {
+    if (!navigator.serial) {
+      document.getElementById('compatWarn').style.display = 'block';
     }
-    const firmware = new Uint8Array(chunks.reduce((acc, c) => {
-      const t = new Uint8Array(acc.length + c.length);
-      t.set(acc); t.set(c, acc.length); return t;
-    }, new Uint8Array()));
-
-    setProgress(20, 'Connexion à la passerelle…');
-    setStatus('info', '🔌', 'Sélectionnez le port série dans la fenêtre qui s\'ouvre…');
-
-    const port = await navigator.serial.requestPort();
-    // ESP32-S3 : 115200 baud, puis sync à 921600
-    await port.open({ baudRate: 115200 });
-
-    setStatus('info', '⚡', 'Flash en cours, ne débranchez pas…');
-    setProgress(25, 'Synchronisation…');
-
-    await flashESP32S3(port, firmware, (pct) => {
-      setProgress(25 + Math.round(pct * 72), 'Envoi du firmware…');
-    });
-
-    await port.close();
-    setProgress(100, 'Mise à jour terminée !');
-    setStatus('success', '✅', '<strong>Mise à jour réussie !</strong><br>La passerelle redémarre. Débranchez le câble USB et remettez l\'ESP32 dans le boîtier.');
-
-  } catch (err) {
-    console.error(err);
-    if (err.name === 'NotFoundError' || (err.message && err.message.includes('No port'))) {
-      setStatus('error', '❌', 'Aucun port sélectionné. Recommencez.');
-    } else {
-      setStatus('error', '❌', '<strong>Erreur :</strong> ' + err.message);
-    }
-    document.getElementById('progressWrap').style.display = 'none';
-  } finally {
-    btn.disabled = false;
-  }
-}
-
-// ── Implémentation ESP32 ROM bootloader (SLIP) ──────────────────────────────
-async function flashESP32S3(port, firmware, onProgress) {
-  const SLIP_END = 0xC0, SLIP_ESC = 0xDB, SLIP_ESC_END = 0xDC, SLIP_ESC_ESC = 0xDD;
-  const sleep = ms => new Promise(r => setTimeout(r, ms));
-
-  const writer = port.writable.getWriter();
-  const reader = port.readable.getReader();
-
-  // Reset DTR/RTS pour entrer en mode bootloader
-  async function resetToBootloader() {
-    try {
-      await port.setSignals({ dataTerminalReady: false, requestToSend: true });
-      await sleep(100);
-      await port.setSignals({ dataTerminalReady: true, requestToSend: false });
-      await sleep(50);
-      await port.setSignals({ dataTerminalReady: false, requestToSend: false });
-      await sleep(500);
-    } catch(e) { /* DTR/RTS non supporté sur certains adaptateurs */ }
-  }
-
-  function slipEncode(data) {
-    const out = [SLIP_END];
-    for (const b of data) {
-      if (b === SLIP_END) { out.push(SLIP_ESC, SLIP_ESC_END); }
-      else if (b === SLIP_ESC) { out.push(SLIP_ESC, SLIP_ESC_ESC); }
-      else out.push(b);
-    }
-    out.push(SLIP_END);
-    return new Uint8Array(out);
-  }
-
-  function buildCmd(op, data, chk = 0) {
-    const pkt = new Uint8Array(8 + data.length);
-    const v = new DataView(pkt.buffer);
-    v.setUint8(0, 0x00); v.setUint8(1, op);
-    v.setUint16(2, data.length, true);
-    v.setUint32(4, chk, true);
-    pkt.set(data, 8);
-    return pkt;
-  }
-
-  function checksum(data) {
-    let c = 0xEF;
-    for (const b of data) c ^= b;
-    return c;
-  }
-
-  async function readPacket(timeoutMs = 3000) {
-    const deadline = Date.now() + timeoutMs;
-    let buf = [], inPkt = false;
-    while (Date.now() < deadline) {
-      let res;
-      try {
-        res = await Promise.race([
-          reader.read(),
-          new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), 100))
-        ]);
-      } catch { continue; }
-      if (res.done) break;
-      for (const b of res.value) {
-        if (b === SLIP_END) {
-          if (inPkt && buf.length > 0) {
-            const dec = [];
-            for (let i = 0; i < buf.length; i++) {
-              if (buf[i] === SLIP_ESC) { i++; dec.push(buf[i] === SLIP_ESC_END ? SLIP_END : SLIP_ESC); }
-              else dec.push(buf[i]);
-            }
-            return new Uint8Array(dec);
-          }
-          inPkt = true; buf = [];
-        } else if (inPkt) buf.push(b);
-      }
-    }
-    throw new Error('Pas de réponse bootloader.');
-  }
-
-  async function sendCmd(op, data, chk = 0, retries = 5, timeoutMs = 3000) {
-    for (let i = 0; i < retries; i++) {
-      await writer.write(slipEncode(buildCmd(op, data, chk)));
-      try {
-        const resp = await readPacket(timeoutMs);
-        if (resp.length >= 2 && resp[1] === op) return resp;
-      } catch(e) { if (i === retries - 1) throw e; }
-    }
-  }
-
-  try {
-    // ── 1. Reset vers bootloader via DTR/RTS ──
-    await resetToBootloader();
-
-    // ── 2. Sync ──
-    let synced = false;
-    for (let i = 0; i < 10; i++) {
-      const syncData = new Uint8Array(36);
-      syncData[0] = 0x07; syncData[1] = 0x07; syncData[2] = 0x12; syncData[3] = 0x20;
-      syncData.fill(0x55, 4);
-      try {
-        await writer.write(slipEncode(buildCmd(0x08, syncData)));
-        const r = await readPacket(500);
-        if (r && r[1] === 0x08) { synced = true; break; }
-      } catch { await sleep(50); }
-    }
-    if (!synced) throw new Error('Synchronisation impossible. Maintenez BOOT + appuyez RESET, puis réessayez.');
-
-    // Vider les réponses sync supplémentaires
-    await sleep(100);
-    try { while(true) await readPacket(50); } catch {}
-
-    // ── 3. SPI_ATTACH (nécessaire ESP32-S3) ──
-    const spiAttach = new Uint8Array(8); // tous zéros
-    await sendCmd(0x0D, spiAttach);
-
-    // ── 4. FLASH_BEGIN ──
-    const FLASH_ADDR = 0x10000;
-    const BLOCK_SIZE = 0x1000; // 4KB pour ESP32-S3
-    const numBlocks = Math.ceil(firmware.length / BLOCK_SIZE);
-    const eraseSize = numBlocks * BLOCK_SIZE;
-
-    const beginData = new Uint8Array(16);
-    const bv = new DataView(beginData.buffer);
-    bv.setUint32(0, eraseSize, true);
-    bv.setUint32(4, numBlocks, true);
-    bv.setUint32(8, BLOCK_SIZE, true);
-    bv.setUint32(12, FLASH_ADDR, true);
-    await sendCmd(0x02, beginData, 0, 3, 30000); // erase peut prendre du temps
-
-    // ── 5. FLASH_DATA ──
-    for (let seq = 0; seq < numBlocks; seq++) {
-      const start = seq * BLOCK_SIZE;
-      const end = Math.min(start + BLOCK_SIZE, firmware.length);
-      const block = new Uint8Array(BLOCK_SIZE);
-      block.set(firmware.slice(start, end));
-      if (end - start < BLOCK_SIZE) block.fill(0xFF, end - start);
-
-      const chk = checksum(block);
-      const blockData = new Uint8Array(16 + BLOCK_SIZE);
-      const dv = new DataView(blockData.buffer);
-      dv.setUint32(0, BLOCK_SIZE, true);
-      dv.setUint32(4, seq, true);
-      dv.setUint32(8, 0, true);
-      dv.setUint32(12, 0, true);
-      blockData.set(block, 16);
-
-      await sendCmd(0x03, blockData, chk);
-      onProgress((seq + 1) / numBlocks);
-    }
-
-    // ── 6. FLASH_END ──
-    const endData = new Uint8Array(4); // reboot=0
-    try { await sendCmd(0x04, endData, 0, 1, 1000); } catch {}
-
-  } finally {
-    try { reader.releaseLock(); } catch {}
-    try { writer.releaseLock(); } catch {}
-  }
-}
+  };
 </script>
 </body>
 </html>
