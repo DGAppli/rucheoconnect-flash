@@ -1,7 +1,7 @@
 {
   "name": "RuchéoConnect Gateway",
   "version": "1.0.60",
-  "new_install_skip_erase": false,
+  "new_install_skip_erase": true,
   "builds": [
     {
       "chipFamily": "ESP32-S3",
