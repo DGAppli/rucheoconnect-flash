@@ -61,6 +61,11 @@
     font-weight: 700; font-size: 0.84rem; text-align: center;
   }
   .driver-link:hover { background: #154360; }
+  .linux-box {
+    margin-bottom: 20px; background: #EAFAF1; border: 1.5px solid #82E0AA;
+    border-radius: 12px; padding: 14px 16px; font-size: 0.86rem; color: #1D6A3F; line-height: 1.6;
+  }
+  .linux-box strong { display: block; margin-bottom: 4px; font-size: 0.92rem; }
   .steps { display: flex; flex-direction: column; gap: 14px; margin-bottom: 28px; }
   .step {
     display: flex; align-items: flex-start; gap: 14px;
@@ -116,13 +121,18 @@
     ⚠️ <strong>Navigateur non compatible.</strong> Cette page nécessite <strong>Google Chrome</strong> ou <strong>Microsoft Edge</strong> (version récente). Firefox et Safari ne supportent pas l'API Serial.
   </div>
 
-  <div class="driver-box">
+  <div class="driver-box" id="driverBox">
     <strong>💻 Pilotes USB requis (Windows uniquement)</strong>
     Installez les deux pilotes — ils coexistent sans problème.
     <div class="driver-links">
-      <a class="driver-link" href="https://www.wch.cn/downloads/CH341SER_EXE.html" target="_blank">⬇️ Pilote CH340 (le plus courant)</a>
+      <a class="driver-link" href="https://sparks.gogo.co.nz/assets/_site_/downloads/CH34x_Install_Windows_v3_4.zip" target="_blank">⬇️ Pilote CH340 (le plus courant)</a>
       <a class="driver-link" href="https://www.silabs.com/documents/public/software/CP210x_Windows_Drivers.zip" target="_blank">⬇️ Pilote CP2102 (Silicon Labs)</a>
     </div>
+  </div>
+
+  <div class="linux-box" id="linuxBox" style="display:none;">
+    <strong>🐧 Linux détecté — aucun pilote requis</strong>
+    Linux reconnaît nativement les modules ESP32. Utilisez directement Google Chrome ou Microsoft Edge pour flasher.
   </div>
 
   <div class="steps">
@@ -157,6 +167,7 @@
     🚨 <strong>NE COCHEZ PAS la case "Erase device"</strong> — cela effacerait la calibration et tous les réglages de la ruche.
   </div>
 </div>
+
 <div class="footer">RuchéoConnect © 2026 – Support : contact@rucheoconnect.fr</div>
 <div style="margin-top:10px;text-align:center;">
   <a href="index.html" style="font-size:0.72rem;color:#bbb;text-decoration:none;">Flasher une passerelle</a>
@@ -164,8 +175,13 @@
 
 <script>
   window.onload = function() {
+    const isLinux = navigator.platform.toLowerCase().includes('linux') || navigator.userAgent.toLowerCase().includes('linux');
     if (!navigator.serial) {
       document.getElementById('compatWarn').style.display = 'block';
+    }
+    if (isLinux) {
+      document.getElementById('driverBox').style.display = 'none';
+      document.getElementById('linuxBox').style.display = 'block';
     }
   };
 </script>
