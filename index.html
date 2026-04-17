@@ -74,12 +74,7 @@
     padding: 8px 14px; font-size: 0.8rem; color: var(--brown-light);
     font-weight: 600; text-align: center; background: var(--cream);
   }
-
-  /* ── Bouton ESP Web Tools stylé comme l'original ── */
-  esp-web-install-button {
-    width: 100%;
-    display: block;
-  }
+  esp-web-install-button { width: 100%; display: block; }
   esp-web-install-button [slot=activate] {
     width: 100%; padding: 17px 24px;
     background: linear-gradient(135deg, #F5A623 0%, #D4881A 100%);
@@ -93,7 +88,6 @@
     transform: translateY(-2px);
     box-shadow: 0 6px 24px rgba(245,166,35,0.55);
   }
-
   .driver-box {
     margin-bottom: 20px; background: #EBF5FB; border: 1.5px solid #85C1E9;
     border-radius: 12px; padding: 14px 16px; font-size: 0.86rem; color: #1A5276; line-height: 1.6;
@@ -106,6 +100,11 @@
     font-weight: 700; font-size: 0.84rem; text-align: center;
   }
   .driver-link:hover { background: #154360; }
+  .linux-box {
+    margin-bottom: 20px; background: #EAFAF1; border: 1.5px solid #82E0AA;
+    border-radius: 12px; padding: 14px 16px; font-size: 0.86rem; color: #1D6A3F; line-height: 1.6;
+  }
+  .linux-box strong { display: block; margin-bottom: 4px; font-size: 0.92rem; }
   .alert-danger {
     margin-top: 16px; background: #FDEDEC; border: 2px solid #E74C3C;
     border-radius: 12px; padding: 14px 16px; font-size: 0.88rem;
@@ -139,13 +138,18 @@
     ⚠️ <strong>Navigateur non compatible.</strong> Cette page nécessite <strong>Google Chrome</strong> ou <strong>Microsoft Edge</strong> (version récente). Firefox et Safari ne supportent pas l'API Serial.
   </div>
 
-  <div class="driver-box">
+  <div class="driver-box" id="driverBox">
     <strong>💻 Pilotes USB requis (Windows uniquement)</strong>
     Avant de commencer, installez les pilotes USB pour que Windows reconnaisse la passerelle. Installez les deux — ils coexistent sans problème.
     <div class="driver-links">
       <a class="driver-link" href="https://sparks.gogo.co.nz/assets/_site_/downloads/CH34x_Install_Windows_v3_4.zip" target="_blank">⬇️ Pilote CH340 (le plus courant)</a>
       <a class="driver-link" href="https://www.silabs.com/documents/public/software/CP210x_Windows_Drivers.zip" target="_blank">⬇️ Pilote CP2102 (Silicon Labs)</a>
     </div>
+  </div>
+
+  <div class="linux-box" id="linuxBox" style="display:none;">
+    <strong>🐧 Linux détecté — aucun pilote requis</strong>
+    Linux reconnaît nativement les modules ESP32. Utilisez directement Google Chrome ou Microsoft Edge pour flasher.
   </div>
 
   <div class="steps">
@@ -198,11 +202,15 @@
   <a href="index_c3.html" style="font-size:0.72rem;color:#bbb;text-decoration:none;">Flasher une ruche</a>
 </div>
 
-
 <script>
   window.onload = function() {
+    const isLinux = navigator.platform.toLowerCase().includes('linux') || navigator.userAgent.toLowerCase().includes('linux');
     if (!navigator.serial) {
       document.getElementById('compatWarn').style.display = 'block';
+    }
+    if (isLinux) {
+      document.getElementById('driverBox').style.display = 'none';
+      document.getElementById('linuxBox').style.display = 'block';
     }
   };
 </script>
