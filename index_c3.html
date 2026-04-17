@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RuchéoConnect – Mise à jour ruche</title>
+<script type="module" src="https://unpkg.com/esp-web-tools@10/dist/web/install-button.js?module"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap');
+  :root {
+    --honey: #F5A623; --honey-dark: #D4881A; --cream: #FFF8EC;
+    --brown: #5C3A1E; --brown-light: #7A5230;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Nunito', sans-serif; background: var(--cream);
+    min-height: 100vh; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; padding: 24px 16px;
+  }
+  .card {
+    background: #fff; border-radius: 24px;
+    box-shadow: 0 8px 40px rgba(92,58,30,0.13);
+    max-width: 560px; width: 100%; padding: 40px 36px;
+    border-top: 6px solid var(--honey);
+  }
+  .header { display: flex; align-items: center; gap: 18px; margin-bottom: 20px; }
+  .logo {
+    width: 72px; height: 72px; border-radius: 18px; flex-shrink: 0;
+    box-shadow: 0 3px 12px rgba(0,0,0,0.15); object-fit: cover;
+  }
+  .header-text h1 { font-size: 1.45rem; font-weight: 800; color: var(--brown); line-height: 1.2; }
+  .header-text p { font-size: 0.88rem; color: var(--brown-light); margin-top: 4px; font-weight: 600; }
+  .version-badge {
+    display: inline-block; background: var(--honey); color: var(--brown);
+    border-radius: 99px; padding: 3px 12px; font-size: 0.8rem; font-weight: 800; margin-left: 8px;
+  }
+  .alert-info {
+    margin-bottom: 20px; background: #FFF3CD; border: 2px solid #F0A000;
+    border-radius: 12px; padding: 14px 16px; font-size: 0.9rem;
+    color: #7D5A00; line-height: 1.5; font-weight: 700;
+  }
+  .compat-warn {
+    margin-bottom: 20px; background: #FFF3CD; border: 2px solid #F0A000;
+    border-radius: 12px; padding: 14px 16px; font-size: 0.88rem;
+    color: #7D5A00; line-height: 1.5; display: none;
+    animation: pulse-warn 1.5s ease-in-out infinite;
+  }
+  @keyframes pulse-warn {
+    0%, 100% { border-color: #F0A000; }
+    50% { border-color: #E74C3C; }
+  }
+  .driver-box {
+    margin-bottom: 20px; background: #EBF5FB; border: 1.5px solid #85C1E9;
+    border-radius: 12px; padding: 14px 16px; font-size: 0.86rem; color: #1A5276; line-height: 1.6;
+  }
+  .driver-box strong { display: block; margin-bottom: 8px; font-size: 0.92rem; }
+  .driver-links { display: flex; flex-direction: column; gap: 8px; margin-top: 8px; }
+  .driver-link {
+    display: inline-block; padding: 8px 14px; border-radius: 10px;
+    background: #1A5276; color: #fff; text-decoration: none;
+    font-weight: 700; font-size: 0.84rem; text-align: center;
+  }
+  .driver-link:hover { background: #154360; }
+  .steps { display: flex; flex-direction: column; gap: 14px; margin-bottom: 28px; }
+  .step {
+    display: flex; align-items: flex-start; gap: 14px;
+    background: var(--cream); border-radius: 14px; padding: 14px 16px;
+    border: 1.5px solid #f0e0c0;
+  }
+  .step-num {
+    width: 32px; height: 32px; background: var(--honey); border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800; font-size: 1rem; color: var(--brown); flex-shrink: 0; margin-top: 1px;
+  }
+  .step-body strong { display: block; font-size: 0.95rem; font-weight: 700; color: var(--brown); margin-bottom: 3px; }
+  .step-body span { font-size: 0.84rem; color: #7A5230; line-height: 1.45; }
+  esp-web-install-button { width: 100%; display: block; }
+  esp-web-install-button [slot=activate] {
+    width: 100%; padding: 17px 24px;
+    background: linear-gradient(135deg, #F5A623 0%, #D4881A 100%);
+    color: #5C3A1E; border: none; border-radius: 14px;
+    font-family: 'Nunito', sans-serif; font-size: 1.1rem; font-weight: 800;
+    cursor: pointer; transition: all .18s;
+    box-shadow: 0 4px 16px rgba(245,166,35,0.4); letter-spacing: 0.3px;
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+  }
+  esp-web-install-button [slot=activate]:hover {
+    transform: translateY(-2px); box-shadow: 0 6px 24px rgba(245,166,35,0.55);
+  }
+  .alert-danger {
+    margin-top: 16px; background: #FDEDEC; border: 2px solid #E74C3C;
+    border-radius: 12px; padding: 14px 16px; font-size: 0.88rem;
+    color: #922B21; line-height: 1.5; font-weight: 700; text-align: center;
+  }
+  .footer { margin-top: 16px; text-align: center; font-size: 0.78rem; color: #bbb; }
+  @media (max-width: 480px) {
+    .card { padding: 28px 18px; } .logo { width: 56px; height: 56px; }
+    .header-text h1 { font-size: 1.2rem; }
+  }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="header">
+    <img class="logo"
+         src="https://firebasestorage.googleapis.com/v0/b/rucheo.firebasestorage.app/o/MAJ_GW%2Fflash_web%2Ficon_new.png?alt=media&token=450535dc-db24-4c82-b48b-6fafbf80445f"
+         alt="RuchéoConnect"
+         onerror="this.src='https://via.placeholder.com/72x72/F5A623/5C3A1E?text=RC'">
+    <div class="header-text">
+      <h1>RuchéoConnect</h1>
+      <p>Mise à jour ruche <span class="version-badge">C3 2.14</span></p>
+    </div>
+  </div>
+
+  <div class="compat-warn" id="compatWarn">
+    ⚠️ <strong>Navigateur non compatible.</strong> Cette page nécessite <strong>Google Chrome</strong> ou <strong>Microsoft Edge</strong> (version récente). Firefox et Safari ne supportent pas l'API Serial.
+  </div>
+
+  <div class="driver-box">
+    <strong>💻 Pilotes USB requis (Windows uniquement)</strong>
+    Installez les deux pilotes — ils coexistent sans problème.
+    <div class="driver-links">
+      <a class="driver-link" href="https://www.wch.cn/downloads/CH341SER_EXE.html" target="_blank">⬇️ Pilote CH340 (le plus courant)</a>
+      <a class="driver-link" href="https://www.silabs.com/documents/public/software/CP210x_Windows_Drivers.zip" target="_blank">⬇️ Pilote CP2102 (Silicon Labs)</a>
+    </div>
+  </div>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-body">
+        <strong>Sortez le module C3 de la ruche</strong>
+        <span>Débranchez le connecteur RS485 et retirez le module ESP32-C3.</span>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-body">
+        <strong>Branchez le câble USB sur le C3</strong>
+        <span>Connectez le câble USB directement sur le port USB du module C3.</span>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-body">
+        <strong>Cliquez sur « Flasher la ruche »</strong>
+        <span>Sélectionnez le port série dans la fenêtre qui s'ouvre, puis attendez la fin (~2 min). Rebranchez ensuite le module dans la ruche.</span>
+      </div>
+    </div>
+  </div>
+
+  <esp-web-install-button manifest="manifest_c3.json">
+    <button slot="activate">⚡ Flasher la ruche</button>
+  </esp-web-install-button>
+
+  <div class="alert-danger">
+    🚨 <strong>NE COCHEZ PAS la case "Erase device"</strong> — cela effacerait la calibration et tous les réglages de la ruche.
+  </div>
+</div>
+
+<div class="footer">RuchéoConnect © 2024 – Support : contact@rucheoconnect.fr</div>
+
+<script>
+  window.onload = function() {
+    if (!navigator.serial) {
+      document.getElementById('compatWarn').style.display = 'block';
+    }
+  };
+</script>
+</body>
+</html>

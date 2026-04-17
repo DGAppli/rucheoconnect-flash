@@ -1,0 +1,15 @@
+{
+  "name": "RuchéoConnect Ruche C3",
+  "version": "2.14",
+  "new_install_skip_erase": true,
+  "builds": [
+    {
+      "chipFamily": "ESP32-C3",
+      "parts": [
+        { "path": "Ruche_2_14.ino.bootloader.bin", "offset": 0 },
+        { "path": "Ruche_2_14.ino.partitions.bin", "offset": 32768 },
+        { "path": "Ruche_2_14.ino.bin", "offset": 65536 }
+      ]
+    }
+  ]
+}
