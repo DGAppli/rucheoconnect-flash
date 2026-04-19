@@ -1,21 +1,21 @@
 {
   "name": "RuchéoConnect Gateway",
-  "version": "2.0.5",
+  "version": "2.0.6",
   "new_install_skip_erase": true,
   "builds": [
     {
       "chipFamily": "ESP32-S3",
       "parts": [
         {
-          "path": "GW_2_0_5.ino.bootloader.bin",
+          "path": "GW_2_0_6.ino.bootloader.bin",
           "offset": 0
         },
         {
-          "path": "GW_2_0_5.ino.partitions.bin",
+          "path": "GW_2_0_6.ino.partitions.bin",
           "offset": 32768
         },
         {
-          "path": "GW_2_0_5.ino.bin",
+          "path": "GW_2_0_6.ino.bin",
           "offset": 65536
         }
       ]
