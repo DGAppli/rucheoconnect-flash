@@ -1,5 +1,5 @@
 {
-  "name": "RuchéoConnect Gateway",
+  "name": "RuchéoConnect Passerelle",
   "version": "2.0.10",
   "new_install_skip_erase": true,
   "builds": [
