@@ -71,6 +71,14 @@
     font-size: 0.82rem; color: #E74C3C; font-weight: 700;
     margin-top: 6px; display: none;
   }
+  .changelog-note {
+    margin-top: 10px; padding: 10px 13px;
+    background: #fff; border-left: 3px solid var(--honey);
+    border-radius: 0 8px 8px 0; font-size: 0.84rem;
+    color: var(--brown-light); font-weight: 600; line-height: 1.5;
+    display: none;
+  }
+  .changelog-note.visible { display: block; }
 
   .alert-info {
     margin-bottom: 20px; background: #FFF3CD; border: 2px solid #F0A000;
@@ -185,6 +193,7 @@
     <div class="version-error" id="versionError">
       ⚠️ Impossible de récupérer les versions. Vérifiez votre connexion et rechargez la page.
     </div>
+    <div class="changelog-note" id="changelogNote"></div>
   </div>
 
   <div class="alert-info">
@@ -306,14 +315,23 @@
   }
 
   // ── Chargement des versions depuis GitHub ────────────────────────────────────
-  const GITHUB_API = 'https://api.github.com/repos/dgappli/rucheoconnect-flash/contents/';
+  const GITHUB_API  = 'https://api.github.com/repos/dgappli/rucheoconnect-flash/contents/';
+  const GITHUB_RAW  = 'https://raw.githubusercontent.com/dgappli/rucheoconnect-flash/main/changelog.json';
 
   async function loadVersions() {
-    const select      = document.getElementById('versionSelect');
-    const loading     = document.getElementById('versionLoading');
-    const errorBox    = document.getElementById('versionError');
-    const installBtn  = document.getElementById('installBtn');
-    const headerBadge = document.getElementById('headerBadge');
+    const select        = document.getElementById('versionSelect');
+    const loading       = document.getElementById('versionLoading');
+    const errorBox      = document.getElementById('versionError');
+    const installBtn    = document.getElementById('installBtn');
+    const headerBadge   = document.getElementById('headerBadge');
+    const changelogNote = document.getElementById('changelogNote');
+
+    // Charger changelog.json en parallèle (échec silencieux)
+    let changelog = {};
+    try {
+      const cr = await fetch(GITHUB_RAW + '?t=' + Date.now());
+      if (cr.ok) changelog = await cr.json();
+    } catch (_) {}
 
     try {
       const resp = await fetch(GITHUB_API, {
@@ -347,10 +365,16 @@
         const v = versions[idx];
         installBtn.setAttribute('manifest', buildManifestBlobUrl(v));
         headerBadge.textContent = v.label;
+        const note = changelog[v.raw] || changelog[v.label] || '';
+        if (note) {
+          changelogNote.textContent = '📝 ' + note;
+          changelogNote.classList.add('visible');
+        } else {
+          changelogNote.classList.remove('visible');
+        }
       }
 
-      applyVersion(0); // Sélectionner la plus récente par défaut
-
+      applyVersion(0);
       select.addEventListener('change', () => applyVersion(parseInt(select.value)));
 
     } catch (err) {
