@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RuchéoConnect – Mise à jour passerelle</title>
+<script type="module" src="https://unpkg.com/esp-web-tools@10/dist/web/install-button.js?module"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap');
+  :root {
+    --honey: #F5A623; --honey-dark: #D4881A; --cream: #FFF8EC;
+    --brown: #5C3A1E; --brown-light: #7A5230;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Nunito', sans-serif; background: var(--cream);
+    min-height: 100vh; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; padding: 24px 16px;
+  }
+  .card {
+    background: #fff; border-radius: 24px;
+    box-shadow: 0 8px 40px rgba(92,58,30,0.13);
+    max-width: 560px; width: 100%; padding: 40px 36px;
+    border-top: 6px solid var(--honey);
+  }
+  .header { display: flex; align-items: center; gap: 18px; margin-bottom: 20px; }
+  .logo {
+    width: 72px; height: 72px; border-radius: 18px; flex-shrink: 0;
+    box-shadow: 0 3px 12px rgba(0,0,0,0.15); object-fit: cover;
+  }
+  .header-text h1 { font-size: 1.45rem; font-weight: 800; color: var(--brown); line-height: 1.2; }
+  .header-text p { font-size: 0.88rem; color: var(--brown-light); margin-top: 4px; font-weight: 600; }
+  .version-badge {
+    display: inline-block; background: var(--honey); color: var(--brown);
+    border-radius: 99px; padding: 3px 12px; font-size: 0.8rem; font-weight: 800; margin-left: 8px;
+  }
+
+  /* Sélecteur de version */
+  .version-selector-box {
+    margin-bottom: 20px; background: var(--cream);
+    border: 2px solid var(--honey); border-radius: 14px;
+    padding: 16px 18px;
+  }
+  .version-selector-box label {
+    display: block; font-size: 0.88rem; font-weight: 800;
+    color: var(--brown); margin-bottom: 8px;
+  }
+  .version-selector-row { display: flex; align-items: center; gap: 10px; }
+  #versionSelect {
+    flex: 1; padding: 10px 14px; border-radius: 10px;
+    border: 1.5px solid #e0c890; font-family: 'Nunito', sans-serif;
+    font-size: 0.92rem; font-weight: 700; color: var(--brown);
+    background: #fff; cursor: pointer; appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%235C3A1E' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 12px center;
+    padding-right: 34px;
+  }
+  #versionSelect:focus { outline: none; border-color: var(--honey); }
+  #versionSelect:disabled { opacity: 0.5; cursor: not-allowed; }
+  .version-loading {
+    font-size: 0.82rem; color: var(--brown-light); font-weight: 600;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .spinner {
+    width: 14px; height: 14px; border: 2px solid #e0c890;
+    border-top-color: var(--honey); border-radius: 50%;
+    animation: spin 0.7s linear infinite; flex-shrink: 0;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .version-error {
+    font-size: 0.82rem; color: #E74C3C; font-weight: 700;
+    margin-top: 6px; display: none;
+  }
+
+  .alert-info {
+    margin-bottom: 20px; background: #FFF3CD; border: 2px solid #F0A000;
+    border-radius: 12px; padding: 14px 16px; font-size: 0.9rem;
+    color: #7D5A00; line-height: 1.5; font-weight: 700;
+  }
+  .compat-warn {
+    margin-bottom: 20px; background: #FFF3CD; border: 2px solid #F0A000;
+    border-radius: 12px; padding: 14px 16px; font-size: 0.88rem;
+    color: #7D5A00; line-height: 1.5; display: none;
+    animation: pulse-warn 1.5s ease-in-out infinite;
+  }
+  @keyframes pulse-warn {
+    0%, 100% { border-color: #F0A000; }
+    50% { border-color: #E74C3C; }
+  }
+  .steps { display: flex; flex-direction: column; gap: 14px; margin-bottom: 28px; }
+  .step {
+    display: flex; align-items: flex-start; gap: 14px;
+    background: var(--cream); border-radius: 14px; padding: 14px 16px;
+    border: 1.5px solid #f0e0c0;
+  }
+  .step-num {
+    width: 32px; height: 32px; background: var(--honey); border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800; font-size: 1rem; color: var(--brown); flex-shrink: 0; margin-top: 1px;
+  }
+  .step-body strong { display: block; font-size: 0.95rem; font-weight: 700; color: var(--brown); margin-bottom: 3px; }
+  .step-body span { font-size: 0.84rem; color: #7A5230; line-height: 1.45; }
+  .photo-wrap {
+    margin: -6px 0 14px 0; border-radius: 14px; overflow: hidden;
+    border: 1.5px solid #f0e0c0; background: var(--cream);
+  }
+  .photo-boitier {
+    width: 100%; display: block; border-radius: 14px 14px 0 0;
+    max-height: 280px; object-fit: cover;
+  }
+  .photo-caption {
+    padding: 8px 14px; font-size: 0.8rem; color: var(--brown-light);
+    font-weight: 600; text-align: center; background: var(--cream);
+  }
+  esp-web-install-button { width: 100%; display: block; }
+  esp-web-install-button [slot=activate] {
+    width: 100%; padding: 17px 24px;
+    background: linear-gradient(135deg, #F5A623 0%, #D4881A 100%);
+    color: #5C3A1E; border: none; border-radius: 14px;
+    font-family: 'Nunito', sans-serif; font-size: 1.1rem; font-weight: 800;
+    cursor: pointer; transition: all .18s;
+    box-shadow: 0 4px 16px rgba(245,166,35,0.4); letter-spacing: 0.3px;
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+  }
+  esp-web-install-button [slot=activate]:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 24px rgba(245,166,35,0.55);
+  }
+  esp-web-install-button[disabled] [slot=activate] {
+    opacity: 0.5; cursor: not-allowed; transform: none;
+  }
+  .driver-box {
+    margin-bottom: 20px; background: #EBF5FB; border: 1.5px solid #85C1E9;
+    border-radius: 12px; padding: 14px 16px; font-size: 0.86rem; color: #1A5276; line-height: 1.6;
+  }
+  .driver-box strong { display: block; margin-bottom: 8px; font-size: 0.92rem; }
+  .driver-links { display: flex; flex-direction: column; gap: 8px; margin-top: 8px; }
+  .driver-link {
+    display: inline-block; padding: 8px 14px; border-radius: 10px;
+    background: #1A5276; color: #fff; text-decoration: none;
+    font-weight: 700; font-size: 0.84rem; text-align: center;
+  }
+  .driver-link:hover { background: #154360; }
+  .linux-box {
+    margin-bottom: 20px; background: #EAFAF1; border: 1.5px solid #82E0AA;
+    border-radius: 12px; padding: 14px 16px; font-size: 0.86rem; color: #1D6A3F; line-height: 1.6;
+  }
+  .linux-box strong { display: block; margin-bottom: 4px; font-size: 0.92rem; }
+  .alert-danger {
+    margin-top: 16px; background: #FDEDEC; border: 2px solid #E74C3C;
+    border-radius: 12px; padding: 14px 16px; font-size: 0.88rem;
+    color: #922B21; line-height: 1.5; font-weight: 700; text-align: center;
+  }
+  .footer { margin-top: 16px; text-align: center; font-size: 0.78rem; color: #bbb; }
+  @media (max-width: 480px) {
+    .card { padding: 28px 18px; } .logo { width: 56px; height: 56px; }
+    .header-text h1 { font-size: 1.2rem; }
+  }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="header">
+    <img class="logo"
+         src="https://firebasestorage.googleapis.com/v0/b/rucheo.firebasestorage.app/o/MAJ_GW%2Fflash_web%2Ficon_new.png?alt=media&token=450535dc-db24-4c82-b48b-6fafbf80445f"
+         alt="RuchéoConnect"
+         onerror="this.src='https://via.placeholder.com/72x72/F5A623/5C3A1E?text=RC'">
+    <div class="header-text">
+      <h1>RuchéoConnect</h1>
+      <p>Mise à jour passerelle <span class="version-badge" id="headerBadge">Chargement…</span></p>
+    </div>
+  </div>
+
+  <!-- Sélecteur de version dynamique -->
+  <div class="version-selector-box">
+    <label>🔧 Version du firmware à installer</label>
+    <div class="version-selector-row">
+      <select id="versionSelect" disabled>
+        <option>Chargement des versions…</option>
+      </select>
+      <div class="version-loading" id="versionLoading">
+        <div class="spinner"></div> GitHub…
+      </div>
+    </div>
+    <div class="version-error" id="versionError">
+      ⚠️ Impossible de récupérer les versions. Vérifiez votre connexion et rechargez la page.
+    </div>
+  </div>
+
+  <div class="alert-info">
+    ⚠️ Si vous souhaitez faire une mise à jour manuelle de votre Passerelle, vous devez effectuer les manipulations suivantes :
+  </div>
+
+  <div class="compat-warn" id="compatWarn">
+    ⚠️ <strong>Navigateur non compatible.</strong> Cette page nécessite <strong>Google Chrome</strong> ou <strong>Microsoft Edge</strong> (version récente). Firefox et Safari ne supportent pas l'API Serial.
+  </div>
+
+  <div class="driver-box" id="driverBox">
+    <strong>💻 Pilotes USB requis (Windows uniquement)</strong>
+    Avant de commencer, installez les pilotes USB pour que Windows reconnaisse la passerelle. Installez les deux — ils coexistent sans problème.
+    <div class="driver-links">
+      <a class="driver-link" href="https://sparks.gogo.co.nz/assets/_site_/downloads/CH34x_Install_Windows_v3_4.zip" target="_blank">⬇️ Pilote CH340 (le plus courant)</a>
+      <a class="driver-link" href="https://www.silabs.com/documents/public/software/CP210x_Windows_Drivers.zip" target="_blank">⬇️ Pilote CP2102 (Silicon Labs)</a>
+    </div>
+  </div>
+
+  <div class="linux-box" id="linuxBox" style="display:none;">
+    <strong>🐧 Linux détecté — aucun pilote requis</strong>
+    Linux reconnaît nativement les modules ESP32. Utilisez directement Google Chrome ou Microsoft Edge pour flasher.
+  </div>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-body">
+        <strong>Sortez le module ESP32 du boîtier</strong>
+        <span>Tirez doucement sur le module ESP32 pour l'extraire du boîtier (voir photo ci-dessous).</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="photo-wrap">
+    <img class="photo-boitier"
+         src="https://firebasestorage.googleapis.com/v0/b/rucheo.firebasestorage.app/o/MAJ_GW%2Fflash_web%2F20260412_201139.png?alt=media&token=80a479d2-4081-41e6-9df8-8162d4338f51"
+         alt="Extraction du module ESP32"
+         onerror="this.style.display='none'">
+    <p class="photo-caption">📷 Tirez sur le module ESP32 pour le sortir du boîtier</p>
+  </div>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-body">
+        <strong>Branchez le câble USB sur l'ESP32</strong>
+        <span>Connectez le câble USB-C directement sur le module ESP32 sorti du boîtier.</span>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-body">
+        <strong>Cliquez sur « Flasher la passerelle »</strong>
+        <span>Sélectionnez le port série dans la fenêtre qui s'ouvre, puis attendez la fin (~2 min). Remettez ensuite l'ESP32 dans le boîtier.</span>
+      </div>
+    </div>
+  </div>
+
+  <esp-web-install-button id="installBtn" manifest="">
+    <button slot="activate">⚡ Flasher la passerelle</button>
+  </esp-web-install-button>
+
+  <div class="alert-danger">
+    🚨 <strong>NE COCHEZ PAS la case "Erase device"</strong> — cela effacerait la calibration de la balance et tous les réglages de la passerelle.
+  </div>
+
+</div>
+
+<div class="footer">RuchéoConnect © 2026 – Support : contact@rucheoconnect.fr</div>
+<div style="margin-top:10px;text-align:center;">
+  <a href="index_c3.html" style="font-size:0.72rem;color:#bbb;text-decoration:none;">Flasher une ruche</a>
+</div>
+
+<script>
+  // ── Utilitaires ──────────────────────────────────────────────────────────────
+
+  // Convertit un nom de fichier GW_X_Y_Z.ino.bin en objet version
+  // ex: "GW_3_0_3.ino.bin" → { raw: "GW_3_0_3", label: "GW 3.0.3", semver: [3,0,3] }
+  function parseGWFile(filename) {
+    const m = filename.match(/^(GW_(\d+)_(\d+)_(\d+))\.ino\.bin$/);
+    if (!m) return null;
+    return {
+      raw: m[1],                                   // "GW_3_0_3"
+      label: `GW ${m[2]}.${m[3]}.${m[4]}`,        // "GW 3.0.3"
+      semver: [parseInt(m[2]), parseInt(m[3]), parseInt(m[4])]
+    };
+  }
+
+  // Compare deux semver décroissant (la plus récente en premier)
+  function semverDesc(a, b) {
+    for (let i = 0; i < 3; i++) {
+      if (a.semver[i] !== b.semver[i]) return b.semver[i] - a.semver[i];
+    }
+    return 0;
+  }
+
+  // Génère un Blob URL de manifest JSON pour une version donnée
+  // Les fichiers .bin sont dans le même répertoire que la page (racine du repo GitHub Pages)
+  let currentBlobUrl = null;
+  function buildManifestBlobUrl(version) {
+    if (currentBlobUrl) URL.revokeObjectURL(currentBlobUrl);
+    const manifest = {
+      name: `RuchéoConnect Passerelle ${version.label}`,
+      version: version.label.replace('GW ', ''),
+      new_install_skip_erase: true,
+      builds: [{
+        chipFamily: "ESP32-S3",
+        parts: [
+          { path: `${version.raw}.ino.bootloader.bin`, offset: 0 },
+          { path: `${version.raw}.ino.partitions.bin`, offset: 32768 },
+          { path: `${version.raw}.ino.bin`,            offset: 65536 }
+        ]
+      }]
+    };
+    const blob = new Blob([JSON.stringify(manifest)], { type: 'application/json' });
+    currentBlobUrl = URL.createObjectURL(blob);
+    return currentBlobUrl;
+  }
+
+  // ── Chargement des versions depuis GitHub ────────────────────────────────────
+  const GITHUB_API = 'https://api.github.com/repos/dgappli/rucheoconnect-flash/contents/';
+
+  async function loadVersions() {
+    const select      = document.getElementById('versionSelect');
+    const loading     = document.getElementById('versionLoading');
+    const errorBox    = document.getElementById('versionError');
+    const installBtn  = document.getElementById('installBtn');
+    const headerBadge = document.getElementById('headerBadge');
+
+    try {
+      const resp = await fetch(GITHUB_API, {
+        headers: { 'Accept': 'application/vnd.github.v3+json' }
+      });
+
+      if (!resp.ok) throw new Error(`GitHub API ${resp.status}`);
+
+      const files = await resp.json();
+      const versions = files
+        .map(f => parseGWFile(f.name))
+        .filter(Boolean)
+        .sort(semverDesc);
+
+      if (versions.length === 0) throw new Error('Aucun fichier GW trouvé');
+
+      // Remplir le select
+      select.innerHTML = '';
+      versions.forEach((v, i) => {
+        const opt = document.createElement('option');
+        opt.value = i;
+        opt.textContent = i === 0 ? `${v.label}  ✦ Dernière version` : v.label;
+        select.appendChild(opt);
+      });
+
+      select.disabled = false;
+      loading.style.display = 'none';
+
+      // Appliquer la version sélectionnée
+      function applyVersion(idx) {
+        const v = versions[idx];
+        installBtn.setAttribute('manifest', buildManifestBlobUrl(v));
+        headerBadge.textContent = v.label;
+      }
+
+      applyVersion(0); // Sélectionner la plus récente par défaut
+
+      select.addEventListener('change', () => applyVersion(parseInt(select.value)));
+
+    } catch (err) {
+      console.error('loadVersions:', err);
+      loading.style.display = 'none';
+      select.innerHTML = '<option>Erreur de chargement</option>';
+      errorBox.style.display = 'block';
+      headerBadge.textContent = '—';
+    }
+  }
+
+  // ── Init ─────────────────────────────────────────────────────────────────────
+  window.onload = function () {
+    const isLinux = /linux/i.test(navigator.platform + navigator.userAgent);
+    if (!navigator.serial) {
+      document.getElementById('compatWarn').style.display = 'block';
+    }
+    if (isLinux) {
+      document.getElementById('driverBox').style.display = 'none';
+      document.getElementById('linuxBox').style.display  = 'block';
+    }
+    loadVersions();
+  };
+</script>
+</body>
+</html>
