@@ -36,12 +36,10 @@
   }
   .version-selector-box {
     margin-bottom: 20px; background: var(--cream);
-    border: 2px solid var(--honey); border-radius: 14px;
-    padding: 16px 18px;
+    border: 2px solid var(--honey); border-radius: 14px; padding: 16px 18px;
   }
   .version-selector-box label {
-    display: block; font-size: 0.88rem; font-weight: 800;
-    color: var(--brown); margin-bottom: 8px;
+    display: block; font-size: 0.88rem; font-weight: 800; color: var(--brown); margin-bottom: 8px;
   }
   .version-selector-row { display: flex; align-items: center; gap: 10px; }
   #versionSelect {
@@ -50,8 +48,7 @@
     font-size: 0.92rem; font-weight: 700; color: var(--brown);
     background: #fff; cursor: pointer; appearance: none;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%235C3A1E' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
-    background-repeat: no-repeat; background-position: right 12px center;
-    padding-right: 34px;
+    background-repeat: no-repeat; background-position: right 12px center; padding-right: 34px;
   }
   #versionSelect:focus { outline: none; border-color: var(--honey); }
   #versionSelect:disabled { opacity: 0.5; cursor: not-allowed; }
@@ -67,16 +64,14 @@
   @keyframes spin { to { transform: rotate(360deg); } }
   .version-error { font-size: 0.82rem; color: #E74C3C; font-weight: 700; margin-top: 6px; display: none; }
   .changelog-note {
-    margin-top: 10px; padding: 10px 13px;
-    background: #fff; border-left: 3px solid var(--honey);
-    border-radius: 0 8px 8px 0; font-size: 0.84rem;
-    color: var(--brown-light); font-weight: 600; line-height: 1.5; display: none;
+    margin-top: 10px; padding: 10px 13px; background: #fff;
+    border-left: 3px solid var(--honey); border-radius: 0 8px 8px 0;
+    font-size: 0.84rem; color: var(--brown-light); font-weight: 600; line-height: 1.5; display: none;
   }
   .changelog-note.visible { display: block; }
   .alert-info {
     margin-bottom: 20px; background: #FFF3CD; border: 2px solid #F0A000;
-    border-radius: 12px; padding: 14px 16px; font-size: 0.9rem;
-    color: #7D5A00; line-height: 1.5; font-weight: 700;
+    border-radius: 12px; padding: 14px 16px; font-size: 0.9rem; color: #7D5A00; line-height: 1.5; font-weight: 700;
   }
   .compat-warn {
     margin-bottom: 20px; background: #FFF3CD; border: 2px solid #F0A000;
@@ -88,8 +83,7 @@
   .steps { display: flex; flex-direction: column; gap: 14px; margin-bottom: 28px; }
   .step {
     display: flex; align-items: flex-start; gap: 14px;
-    background: var(--cream); border-radius: 14px; padding: 14px 16px;
-    border: 1.5px solid #f0e0c0;
+    background: var(--cream); border-radius: 14px; padding: 14px 16px; border: 1.5px solid #f0e0c0;
   }
   .step-num {
     width: 32px; height: 32px; background: var(--honey); border-radius: 50%;
@@ -123,8 +117,7 @@
   .driver-links { display: flex; flex-direction: column; gap: 8px; margin-top: 8px; }
   .driver-link {
     display: inline-block; padding: 8px 14px; border-radius: 10px;
-    background: #1A5276; color: #fff; text-decoration: none;
-    font-weight: 700; font-size: 0.84rem; text-align: center;
+    background: #1A5276; color: #fff; text-decoration: none; font-weight: 700; font-size: 0.84rem; text-align: center;
   }
   .driver-link:hover { background: #154360; }
   .linux-box {
@@ -153,7 +146,7 @@
          onerror="this.src='https://via.placeholder.com/72x72/F5A623/5C3A1E?text=RC'">
     <div class="header-text">
       <h1>RuchéoConnect</h1>
-      <p>Mise à jour passerelle V3<span class="version-badge" id="headerBadge">Chargement…</span></p>
+      <p>Mise à jour passerelle V4<span class="version-badge" id="headerBadge">Chargement…</span></p>
     </div>
   </div>
 
@@ -230,7 +223,6 @@
     </div>
   </div>
 
-  <!-- Le bouton est caché, remplacé par un bouton natif qui appelle l'API directement -->
   <esp-web-install-button id="installBtn" manifest="manifest_current.json">
     <button slot="activate">⚡ Flasher la passerelle</button>
   </esp-web-install-button>
@@ -246,10 +238,8 @@
 </div>
 
 <script>
-  // URL de base du repo (fichiers servis par GitHub Pages)
-  const REPO_RAW    = 'https://dgappli.github.io/rucheoconnect-flash/';
-  const GITHUB_API  = 'https://api.github.com/repos/dgappli/rucheoconnect-flash/contents/';
-  const GITHUB_RAW  = 'https://raw.githubusercontent.com/dgappli/rucheoconnect-flash/main/changelog.json';
+  const GITHUB_API = 'https://api.github.com/repos/dgappli/rucheoconnect-flash/contents/';
+  const GITHUB_RAW = 'https://raw.githubusercontent.com/dgappli/rucheoconnect-flash/main/changelog.json';
 
   function parseGWFile(filename) {
     const m = filename.match(/^(GW_(\d+)_(\d+)_(\d+))\.ino\.bin$/);
@@ -268,82 +258,19 @@
     return 0;
   }
 
-  // ── Clé : on écrit le manifest dans un <script> accessible via Service Worker,
-  //    OU plus simple : on sert le manifest depuis une URL relative réelle.
-  //    Solution retenue : on génère manifest_current.json côté GitHub via
-  //    une GitHub Action, ET en fallback on utilise un Service Worker
-  //    qui intercepte la requête manifest_current.json et répond avec
-  //    le JSON généré en mémoire.
-  // ─────────────────────────────────────────────────────────────────────────
-
-  let currentManifest = null;
-
-  // Enregistre le Service Worker qui intercepte manifest_current.json
-  async function registerSW(manifest) {
-    if (!('serviceWorker' in navigator)) return false;
-    try {
-      // Passer le manifest au SW via un message après enregistrement
-      const reg = await navigator.serviceWorker.register('sw_manifest.js');
-      await navigator.serviceWorker.ready;
-      const sw = reg.active || reg.waiting || reg.installing;
-      if (sw) {
-        sw.postMessage({ type: 'SET_MANIFEST', manifest: JSON.stringify(manifest) });
-      }
-      // Écouter la confirmation
-      return true;
-    } catch(e) {
-      console.warn('SW non disponible:', e);
-      return false;
-    }
-  }
-
-  async function applyVersion(version, changelog) {
-    const installBtn    = document.getElementById('installBtn');
-    const headerBadge   = document.getElementById('headerBadge');
-    const changelogNote = document.getElementById('changelogNote');
-
-    currentManifest = {
-      name: `RuchéoConnect Passerelle ${version.label}`,
-      version: version.label.replace('GW ', ''),
-      new_install_skip_erase: true,
-      builds: [{
-        chipFamily: "ESP32-S3",
-        parts: [
-          { path: `${REPO_RAW}${version.raw}.ino.bootloader.bin`, offset: 0 },
-          { path: `${REPO_RAW}${version.raw}.ino.partitions.bin`, offset: 32768 },
-          { path: `${REPO_RAW}${version.raw}.ino.bin`,            offset: 65536 }
-        ]
-      }]
-    };
-
-    // Mettre à jour le SW avec le nouveau manifest
-    if (navigator.serviceWorker && navigator.serviceWorker.controller) {
-      navigator.serviceWorker.controller.postMessage({
-        type: 'SET_MANIFEST',
-        manifest: JSON.stringify(currentManifest)
-      });
-    }
-
-    // Le bouton pointe toujours vers manifest_current.json (intercepté par le SW)
-    // On force le rechargement de l'attribut pour que esp-web-tools le relise
-    installBtn.removeAttribute('manifest');
-    await new Promise(r => setTimeout(r, 50));
-    installBtn.setAttribute('manifest', 'manifest_current.json');
-
-    headerBadge.textContent = version.label;
-    const note = changelog[version.raw] || changelog[version.label] || '';
-    if (note) {
-      changelogNote.textContent = '📝 ' + note;
-      changelogNote.classList.add('visible');
-    } else {
-      changelogNote.classList.remove('visible');
-    }
+  // Génère un manifest_X_Y_Z.json à la volée sur le repo GitHub Pages
+  // Tous ces fichiers sont statiques et servis directement — pas de Blob URL
+  function manifestUrl(version) {
+    return `manifest_${version.raw}.json`;
   }
 
   async function loadVersions() {
     const select        = document.getElementById('versionSelect');
     const loading       = document.getElementById('versionLoading');
     const errorBox      = document.getElementById('versionError');
+    const installBtn    = document.getElementById('installBtn');
+    const headerBadge   = document.getElementById('headerBadge');
+    const changelogNote = document.getElementById('changelogNote');
 
     let changelog = {};
     try {
@@ -365,9 +292,6 @@
 
       if (versions.length === 0) throw new Error('Aucun fichier GW trouvé');
 
-      // Enregistrer le SW avant d'appliquer la première version
-      await registerSW({});
-
       select.innerHTML = '';
       versions.forEach((v, i) => {
         const opt = document.createElement('option');
@@ -378,11 +302,22 @@
       select.disabled = false;
       loading.style.display = 'none';
 
-      await applyVersion(versions[0], changelog);
+      function applyVersion(idx) {
+        const v = versions[idx];
+        // Pointe vers manifest_GW_X_Y_Z.json — fichier statique généré par la GitHub Action
+        installBtn.setAttribute('manifest', manifestUrl(v));
+        headerBadge.textContent = v.label;
+        const note = changelog[v.raw] || changelog[v.label] || '';
+        if (note) {
+          changelogNote.textContent = '📝 ' + note;
+          changelogNote.classList.add('visible');
+        } else {
+          changelogNote.classList.remove('visible');
+        }
+      }
 
-      select.addEventListener('change', () =>
-        applyVersion(versions[parseInt(select.value)], changelog)
-      );
+      applyVersion(0);
+      select.addEventListener('change', () => applyVersion(parseInt(select.value)));
 
     } catch (err) {
       console.error('loadVersions:', err);
