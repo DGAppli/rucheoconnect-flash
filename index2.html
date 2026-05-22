@@ -34,8 +34,6 @@
     display: inline-block; background: var(--honey); color: var(--brown);
     border-radius: 99px; padding: 3px 12px; font-size: 0.8rem; font-weight: 800; margin-left: 8px;
   }
-
-  /* Sélecteur de version */
   .version-selector-box {
     margin-bottom: 20px; background: var(--cream);
     border: 2px solid var(--honey); border-radius: 14px;
@@ -67,19 +65,14 @@
     animation: spin 0.7s linear infinite; flex-shrink: 0;
   }
   @keyframes spin { to { transform: rotate(360deg); } }
-  .version-error {
-    font-size: 0.82rem; color: #E74C3C; font-weight: 700;
-    margin-top: 6px; display: none;
-  }
+  .version-error { font-size: 0.82rem; color: #E74C3C; font-weight: 700; margin-top: 6px; display: none; }
   .changelog-note {
     margin-top: 10px; padding: 10px 13px;
     background: #fff; border-left: 3px solid var(--honey);
     border-radius: 0 8px 8px 0; font-size: 0.84rem;
-    color: var(--brown-light); font-weight: 600; line-height: 1.5;
-    display: none;
+    color: var(--brown-light); font-weight: 600; line-height: 1.5; display: none;
   }
   .changelog-note.visible { display: block; }
-
   .alert-info {
     margin-bottom: 20px; background: #FFF3CD; border: 2px solid #F0A000;
     border-radius: 12px; padding: 14px 16px; font-size: 0.9rem;
@@ -91,10 +84,7 @@
     color: #7D5A00; line-height: 1.5; display: none;
     animation: pulse-warn 1.5s ease-in-out infinite;
   }
-  @keyframes pulse-warn {
-    0%, 100% { border-color: #F0A000; }
-    50% { border-color: #E74C3C; }
-  }
+  @keyframes pulse-warn { 0%,100%{border-color:#F0A000} 50%{border-color:#E74C3C} }
   .steps { display: flex; flex-direction: column; gap: 14px; margin-bottom: 28px; }
   .step {
     display: flex; align-items: flex-start; gap: 14px;
@@ -112,14 +102,8 @@
     margin: -6px 0 14px 0; border-radius: 14px; overflow: hidden;
     border: 1.5px solid #f0e0c0; background: var(--cream);
   }
-  .photo-boitier {
-    width: 100%; display: block; border-radius: 14px 14px 0 0;
-    max-height: 280px; object-fit: cover;
-  }
-  .photo-caption {
-    padding: 8px 14px; font-size: 0.8rem; color: var(--brown-light);
-    font-weight: 600; text-align: center; background: var(--cream);
-  }
+  .photo-boitier { width: 100%; display: block; border-radius: 14px 14px 0 0; max-height: 280px; object-fit: cover; }
+  .photo-caption { padding: 8px 14px; font-size: 0.8rem; color: var(--brown-light); font-weight: 600; text-align: center; background: var(--cream); }
   esp-web-install-button { width: 100%; display: block; }
   esp-web-install-button [slot=activate] {
     width: 100%; padding: 17px 24px;
@@ -130,13 +114,7 @@
     box-shadow: 0 4px 16px rgba(245,166,35,0.4); letter-spacing: 0.3px;
     display: flex; align-items: center; justify-content: center; gap: 10px;
   }
-  esp-web-install-button [slot=activate]:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 24px rgba(245,166,35,0.55);
-  }
-  esp-web-install-button[disabled] [slot=activate] {
-    opacity: 0.5; cursor: not-allowed; transform: none;
-  }
+  esp-web-install-button [slot=activate]:hover { transform: translateY(-2px); box-shadow: 0 6px 24px rgba(245,166,35,0.55); }
   .driver-box {
     margin-bottom: 20px; background: #EBF5FB; border: 1.5px solid #85C1E9;
     border-radius: 12px; padding: 14px 16px; font-size: 0.86rem; color: #1A5276; line-height: 1.6;
@@ -179,7 +157,6 @@
     </div>
   </div>
 
-  <!-- Sélecteur de version dynamique -->
   <div class="version-selector-box">
     <label>🔧 Version du firmware à installer</label>
     <div class="version-selector-row">
@@ -253,14 +230,14 @@
     </div>
   </div>
 
-  <esp-web-install-button id="installBtn" manifest="">
+  <!-- Le bouton est caché, remplacé par un bouton natif qui appelle l'API directement -->
+  <esp-web-install-button id="installBtn" manifest="manifest_current.json">
     <button slot="activate">⚡ Flasher la passerelle</button>
   </esp-web-install-button>
 
   <div class="alert-danger">
     🚨 <strong>NE COCHEZ PAS la case "Erase device"</strong> — cela effacerait la calibration de la balance et tous les réglages de la passerelle.
   </div>
-
 </div>
 
 <div class="footer">RuchéoConnect © 2026 – Support : contact@rucheoconnect.fr</div>
@@ -269,21 +246,21 @@
 </div>
 
 <script>
-  // ── Utilitaires ──────────────────────────────────────────────────────────────
+  // URL de base du repo (fichiers servis par GitHub Pages)
+  const REPO_RAW    = 'https://dgappli.github.io/rucheoconnect-flash/';
+  const GITHUB_API  = 'https://api.github.com/repos/dgappli/rucheoconnect-flash/contents/';
+  const GITHUB_RAW  = 'https://raw.githubusercontent.com/dgappli/rucheoconnect-flash/main/changelog.json';
 
-  // Convertit un nom de fichier GW_X_Y_Z.ino.bin en objet version
-  // ex: "GW_3_0_3.ino.bin" → { raw: "GW_3_0_3", label: "GW 3.0.3", semver: [3,0,3] }
   function parseGWFile(filename) {
     const m = filename.match(/^(GW_(\d+)_(\d+)_(\d+))\.ino\.bin$/);
     if (!m) return null;
     return {
-      raw: m[1],                                   // "GW_3_0_3"
-      label: `GW ${m[2]}.${m[3]}.${m[4]}`,        // "GW 3.0.3"
+      raw: m[1],
+      label: `GW ${m[2]}.${m[3]}.${m[4]}`,
       semver: [parseInt(m[2]), parseInt(m[3]), parseInt(m[4])]
     };
   }
 
-  // Compare deux semver décroissant (la plus récente en premier)
   function semverDesc(a, b) {
     for (let i = 0; i < 3; i++) {
       if (a.semver[i] !== b.semver[i]) return b.semver[i] - a.semver[i];
@@ -291,42 +268,83 @@
     return 0;
   }
 
-  // Génère un Blob URL de manifest JSON pour une version donnée
-  // Les fichiers .bin sont dans le même répertoire que la page (racine du repo GitHub Pages)
-  let currentBlobUrl = null;
-  function buildManifestBlobUrl(version) {
-    if (currentBlobUrl) URL.revokeObjectURL(currentBlobUrl);
-    const manifest = {
+  // ── Clé : on écrit le manifest dans un <script> accessible via Service Worker,
+  //    OU plus simple : on sert le manifest depuis une URL relative réelle.
+  //    Solution retenue : on génère manifest_current.json côté GitHub via
+  //    une GitHub Action, ET en fallback on utilise un Service Worker
+  //    qui intercepte la requête manifest_current.json et répond avec
+  //    le JSON généré en mémoire.
+  // ─────────────────────────────────────────────────────────────────────────
+
+  let currentManifest = null;
+
+  // Enregistre le Service Worker qui intercepte manifest_current.json
+  async function registerSW(manifest) {
+    if (!('serviceWorker' in navigator)) return false;
+    try {
+      // Passer le manifest au SW via un message après enregistrement
+      const reg = await navigator.serviceWorker.register('sw_manifest.js');
+      await navigator.serviceWorker.ready;
+      const sw = reg.active || reg.waiting || reg.installing;
+      if (sw) {
+        sw.postMessage({ type: 'SET_MANIFEST', manifest: JSON.stringify(manifest) });
+      }
+      // Écouter la confirmation
+      return true;
+    } catch(e) {
+      console.warn('SW non disponible:', e);
+      return false;
+    }
+  }
+
+  async function applyVersion(version, changelog) {
+    const installBtn    = document.getElementById('installBtn');
+    const headerBadge   = document.getElementById('headerBadge');
+    const changelogNote = document.getElementById('changelogNote');
+
+    currentManifest = {
       name: `RuchéoConnect Passerelle ${version.label}`,
       version: version.label.replace('GW ', ''),
       new_install_skip_erase: true,
       builds: [{
         chipFamily: "ESP32-S3",
         parts: [
-          { path: `${version.raw}.ino.bootloader.bin`, offset: 0 },
-          { path: `${version.raw}.ino.partitions.bin`, offset: 32768 },
-          { path: `${version.raw}.ino.bin`,            offset: 65536 }
+          { path: `${REPO_RAW}${version.raw}.ino.bootloader.bin`, offset: 0 },
+          { path: `${REPO_RAW}${version.raw}.ino.partitions.bin`, offset: 32768 },
+          { path: `${REPO_RAW}${version.raw}.ino.bin`,            offset: 65536 }
         ]
       }]
     };
-    const blob = new Blob([JSON.stringify(manifest)], { type: 'application/json' });
-    currentBlobUrl = URL.createObjectURL(blob);
-    return currentBlobUrl;
-  }
 
-  // ── Chargement des versions depuis GitHub ────────────────────────────────────
-  const GITHUB_API  = 'https://api.github.com/repos/dgappli/rucheoconnect-flash/contents/';
-  const GITHUB_RAW  = 'https://raw.githubusercontent.com/dgappli/rucheoconnect-flash/main/changelog.json';
+    // Mettre à jour le SW avec le nouveau manifest
+    if (navigator.serviceWorker && navigator.serviceWorker.controller) {
+      navigator.serviceWorker.controller.postMessage({
+        type: 'SET_MANIFEST',
+        manifest: JSON.stringify(currentManifest)
+      });
+    }
+
+    // Le bouton pointe toujours vers manifest_current.json (intercepté par le SW)
+    // On force le rechargement de l'attribut pour que esp-web-tools le relise
+    installBtn.removeAttribute('manifest');
+    await new Promise(r => setTimeout(r, 50));
+    installBtn.setAttribute('manifest', 'manifest_current.json');
+
+    headerBadge.textContent = version.label;
+    const note = changelog[version.raw] || changelog[version.label] || '';
+    if (note) {
+      changelogNote.textContent = '📝 ' + note;
+      changelogNote.classList.add('visible');
+    } else {
+      changelogNote.classList.remove('visible');
+    }
+  }
 
   async function loadVersions() {
     const select        = document.getElementById('versionSelect');
     const loading       = document.getElementById('versionLoading');
     const errorBox      = document.getElementById('versionError');
-    const installBtn    = document.getElementById('installBtn');
-    const headerBadge   = document.getElementById('headerBadge');
-    const changelogNote = document.getElementById('changelogNote');
 
-    // Charger changelog.json en parallèle (échec silencieux)
     let changelog = {};
     try {
       const cr = await fetch(GITHUB_RAW + '?t=' + Date.now());
@@ -337,7 +355,6 @@
       const resp = await fetch(GITHUB_API, {
         headers: { 'Accept': 'application/vnd.github.v3+json' }
       });
-
       if (!resp.ok) throw new Error(`GitHub API ${resp.status}`);
 
       const files = await resp.json();
@@ -348,7 +365,9 @@
 
       if (versions.length === 0) throw new Error('Aucun fichier GW trouvé');
 
-      // Remplir le select
+      // Enregistrer le SW avant d'appliquer la première version
+      await registerSW({});
+
       select.innerHTML = '';
       versions.forEach((v, i) => {
         const opt = document.createElement('option');
@@ -356,42 +375,27 @@
         opt.textContent = i === 0 ? `${v.label}  ✦ Dernière version` : v.label;
         select.appendChild(opt);
       });
-
       select.disabled = false;
       loading.style.display = 'none';
 
-      // Appliquer la version sélectionnée
-      function applyVersion(idx) {
-        const v = versions[idx];
-        installBtn.setAttribute('manifest', buildManifestBlobUrl(v));
-        headerBadge.textContent = v.label;
-        const note = changelog[v.raw] || changelog[v.label] || '';
-        if (note) {
-          changelogNote.textContent = '📝 ' + note;
-          changelogNote.classList.add('visible');
-        } else {
-          changelogNote.classList.remove('visible');
-        }
-      }
+      await applyVersion(versions[0], changelog);
 
-      applyVersion(0);
-      select.addEventListener('change', () => applyVersion(parseInt(select.value)));
+      select.addEventListener('change', () =>
+        applyVersion(versions[parseInt(select.value)], changelog)
+      );
 
     } catch (err) {
       console.error('loadVersions:', err);
       loading.style.display = 'none';
       select.innerHTML = '<option>Erreur de chargement</option>';
       errorBox.style.display = 'block';
-      headerBadge.textContent = '—';
+      document.getElementById('headerBadge').textContent = '—';
     }
   }
 
-  // ── Init ─────────────────────────────────────────────────────────────────────
   window.onload = function () {
     const isLinux = /linux/i.test(navigator.platform + navigator.userAgent);
-    if (!navigator.serial) {
-      document.getElementById('compatWarn').style.display = 'block';
-    }
+    if (!navigator.serial) document.getElementById('compatWarn').style.display = 'block';
     if (isLinux) {
       document.getElementById('driverBox').style.display = 'none';
       document.getElementById('linuxBox').style.display  = 'block';
