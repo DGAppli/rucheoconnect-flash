@@ -1,0 +1,53 @@
+name: Générer les fichiers manifest
+
+on:
+  push:
+    paths:
+      - 'GW_*.ino.bin'
+  workflow_dispatch:
+
+jobs:
+  update-manifests:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Générer un manifest JSON par version GW
+        run: |
+          for BIN in GW_*.ino.bin; do
+            [ -f "$BIN" ] || continue
+            BASE="${BIN%.ino.bin}"
+            VERSION=$(echo $BASE | sed 's/GW_//' | tr '_' '.')
+            MANIFEST="manifest_${BASE}.json"
+
+            cat > "$MANIFEST" << JSON
+          {
+            "name": "RuchéoConnect Passerelle GW ${VERSION}",
+            "version": "${VERSION}",
+            "new_install_skip_erase": true,
+            "builds": [
+              {
+                "chipFamily": "ESP32-S3",
+                "parts": [
+                  { "path": "${BASE}.ino.bootloader.bin", "offset": 0 },
+                  { "path": "${BASE}.ino.partitions.bin", "offset": 32768 },
+                  { "path": "${BASE}.ino.bin",            "offset": 65536 }
+                ]
+              }
+            ]
+          }
+          JSON
+            echo "Généré : $MANIFEST"
+          done
+
+      - name: Commiter les manifests
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add manifest_GW_*.json
+          git diff --staged --quiet || git commit -m "chore: mise à jour manifests [skip ci]"
+          git push
